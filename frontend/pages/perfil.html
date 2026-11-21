@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Perfil · Quitanda da Liro</title>
+  <link rel="icon" type="image/png" href="../assets/images/logo-quitanda-liro-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body data-root="..">
+  <header id="site-header"></header>
+  <main class="container" style="max-width:560px">
+    <section class="painel formulario">
+      <h1>Meu perfil</h1>
+      <div id="msg-auth" hidden></div>
+      <form id="form-perfil">
+        <label for="nome_completo">Nome completo</label>
+        <input id="nome_completo" name="nome_completo" required>
+        <label for="cpf">CPF</label>
+        <input id="cpf" name="cpf" readonly>
+        <label for="celular">Celular</label>
+        <input id="celular" name="celular" required>
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" required>
+        <div class="acoes-form">
+          <button class="btn btn-verde" type="submit">Salvar</button>
+          <button class="btn btn-claro" id="btn-sair" type="button">Sair da conta</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <footer id="site-footer"></footer>
+  <script src="../js/api.js"></script>
+  <script src="../js/carrinho.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
