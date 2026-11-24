@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Meus pedidos · Quitanda da Liro</title>
-  <link rel="icon" type="image/png" href="../assets/images/logo-quitanda-liro-favicon.png">
+  <link rel="icon" type="image/png" href="../assets/imagens/logo-quitanda-liro-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
@@ -15,13 +15,31 @@
   <header id="site-header"></header>
   <main class="container secao">
     <h1>Meus pedidos</h1>
+    <p id="mensagem-pedidos" class="msg" aria-live="polite" hidden></p>
     <div id="lista-pedidos"></div>
   </main>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-confirmacao-cancelamento"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-confirmacao-cancelamento"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-confirmacao-cancelamento">Cancelar pedido?</h2>
+      <p>Tem certeza de que deseja cancelar este pedido?</p>
+      <div class="acoes-form">
+        <button class="btn btn-verde" id="confirmar-cancelamento-pedido" type="button">Sim, cancelar</button>
+        <button class="btn btn-claro" id="negar-cancelamento-pedido" type="button">Não</button>
+      </div>
+    </div>
+  </div>
   <footer id="site-footer"></footer>
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=2"></script>
   <script src="../js/carrinho.js"></script>
-  <script src="../js/app.js"></script>
+  <script src="../js/app.js?v=4"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/pedidos.js"></script>
+  <script src="../js/pedidos.js?v=8"></script>
 </body>
 </html>

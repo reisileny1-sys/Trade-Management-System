@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin · Quitanda da Liro</title>
-  <link rel="icon" type="image/png" href="../assets/images/logo-quitanda-liro-favicon.png">
+  <link rel="icon" type="image/png" href="../assets/imagens/logo-quitanda-liro-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/components.css?v=2">
   <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body data-root=".." data-page="admin">
@@ -53,11 +53,29 @@
       </form>
     </section>
   </main>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-confirmacao-admin"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-confirmacao-admin"
+    aria-describedby="texto-confirmacao-admin"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-confirmacao-admin">Confirmar ação</h2>
+      <p id="texto-confirmacao-admin"></p>
+      <div class="acoes-form">
+        <button class="btn btn-verde" id="confirmar-acao-admin" type="button">Sim</button>
+        <button class="btn btn-claro" id="cancelar-acao-admin" type="button">Não</button>
+      </div>
+    </div>
+  </div>
   <footer id="site-footer"></footer>
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=2"></script>
   <script src="../js/carrinho.js"></script>
-  <script src="../js/app.js"></script>
+  <script src="../js/app.js?v=4"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/pedidos.js"></script>
+  <script src="../js/pedidos.js?v=2"></script>
 </body>
 </html>
