@@ -39,6 +39,34 @@ function headerHtml(pagina) {
       : "";
   const link = (grupo) =>
     `${caminho("pages/produtos.html")}?grupo=${encodeURIComponent(grupo)}`;
+  const nav = pagina === "admin"
+    ? `
+        <nav class="nav-main nav-wrap admin-main-nav" aria-label="Navegação administrativa">
+          <div class="admin-tabs" role="tablist">
+            <button type="button" id="tab-catalogo" class="ativo" data-admin-tab="catalogo" role="tab" aria-controls="secao-catalogo" aria-selected="true">Produtos do catálogo</button>
+            <button type="button" id="tab-pedidos" data-admin-tab="pedidos" role="tab" aria-controls="secao-pedidos" aria-selected="false">Todos os pedidos</button>
+            <button type="button" id="tab-cadastro" data-admin-tab="cadastro" role="tab" aria-controls="secao-cadastro" aria-selected="false">Cadastrar produto</button>
+          </div>
+          <a class="admin-exit" href="${caminho("index.html")}">Sair do modo administrador</a>
+        </nav>
+      `
+    : `
+        <nav class="nav-main nav-wrap">
+          <div class="menu-cat">
+            <button type="button">☰ Todas as categorias</button>
+            <div class="menu-drop">
+              <a href="${link("Hortifruti")}">Hortifruti</a>
+              <a href="${link("Bebidas")}">Bebidas</a>
+              <a href="${link("Limpeza")}">Limpeza</a>
+              <a href="${caminho("pages/meus-pedidos.html")}">Meus pedidos</a>
+              ${admin}
+            </div>
+          </div>
+          <a class="${pagina === "produtos" ? "ativo" : ""}" href="${link("Hortifruti")}">Hortifruti</a>
+          <a href="${link("Bebidas")}">Bebidas</a>
+          <a href="${link("Limpeza")}">Limpeza</a>
+        </nav>
+      `;
   return `
     <div class="faixa-topo"></span> Fresquinho, saudável e pertinho de você!</div>
     <div class="header-inner">
@@ -67,21 +95,7 @@ function headerHtml(pagina) {
       </div>
     </div>
     <div class="nav-bar">
-      <nav class="nav-main nav-wrap">
-        <div class="menu-cat">
-          <button type="button">☰ Todas as categorias</button>
-          <div class="menu-drop">
-            <a href="${link("Hortifruti")}">Hortifruti</a>
-            <a href="${link("Bebidas")}">Bebidas</a>
-            <a href="${link("Limpeza")}">Limpeza</a>
-            <a href="${caminho("pages/meus-pedidos.html")}">Meus pedidos</a>
-            ${admin}
-          </div>
-        </div>
-        <a class="${pagina === "produtos" ? "ativo" : ""}" href="${link("Hortifruti")}">Hortifruti</a>
-        <a href="${link("Bebidas")}">Bebidas</a>
-        <a href="${link("Limpeza")}">Limpeza</a>
-      </nav>
+      ${nav}
     </div>
   `;
 }

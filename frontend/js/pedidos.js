@@ -282,13 +282,33 @@ async function iniciarAdmin() {
   const titulo = document.getElementById("titulo-form-produto");
   const botaoSalvar = document.getElementById("btn-salvar-produto");
   const botaoCancelar = document.getElementById("btn-cancelar-edicao");
+  const secoes = {
+    catalogo: document.getElementById("secao-catalogo"),
+    pedidos: document.getElementById("secao-pedidos"),
+    cadastro: document.getElementById("secao-cadastro"),
+  };
   let produtos = [];
+
+  function selecionarSecao(nome) {
+    Object.entries(secoes).forEach(([chave, secao]) => {
+      const selecionada = chave === nome;
+      secao.hidden = !selecionada;
+      const tab = document.querySelector(`[data-admin-tab="${chave}"]`);
+      tab.classList.toggle("ativo", selecionada);
+      tab.setAttribute("aria-selected", String(selecionada));
+    });
+  }
+
+  document.addEventListener("click", (ev) => {
+    const tab = ev.target.closest("[data-admin-tab]");
+    if (tab) selecionarSecao(tab.dataset.adminTab);
+  });
 
   function resetarFormulario() {
     form.reset();
     form.produto_id.value = "";
     form.imagem.required = true;
-    titulo.textContent = "Adicionar produto";
+    titulo.textContent = "Cadastrar produto";
     botaoSalvar.textContent = "Cadastrar produto";
     botaoCancelar.hidden = true;
   }
@@ -305,6 +325,7 @@ async function iniciarAdmin() {
     titulo.textContent = "Editar produto";
     botaoSalvar.textContent = "Salvar alterações";
     botaoCancelar.hidden = false;
+    selecionarSecao("cadastro");
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

@@ -11,18 +11,27 @@
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/responsive.css">
 </head>
-<body data-root="..">
+<body data-root=".." data-page="admin">
   <header id="site-header"></header>
   <main class="container secao">
-    <h1>Administração</h1>
-    <div id="msg-admin" hidden></div>
-    <nav class="admin-navegacao" aria-label="Navegação administrativa">
-      <a class="btn btn-verde" href="#form-produto-admin">Adicionar produto</a>
-      <a class="btn btn-claro" href="#secao-pedidos">Todos os pedidos</a>
-      <a class="btn btn-claro" href="#secao-catalogo">Produtos do catálogo</a>
-    </nav>
-    <section class="painel formulario">
-      <h2 id="titulo-form-produto">Adicionar produto</h2>
+    <div id="msg-admin" role="status" hidden></div>
+    <section class="painel admin-secao" id="secao-catalogo" role="tabpanel" aria-labelledby="tab-catalogo" tabindex="0">
+      <h1>Produtos do Catálogo</h1>
+      <p class="ajuda">Visualize, edite ou remova os produtos disponíveis na loja.</p>
+      <div id="admin-produtos" class="grade"></div>
+    </section>
+    <section class="painel admin-secao" id="secao-pedidos" role="tabpanel" aria-labelledby="tab-pedidos" tabindex="0" hidden>
+      <h1>Todos os pedidos</h1>
+      <p class="ajuda">Atualize o andamento da preparação e da retirada.</p>
+      <table class="admin-tabela">
+        <thead>
+          <tr><th>Nº</th><th>Cliente</th><th>Data</th><th>Total</th><th>Pagamento</th><th>Recebimento</th><th>Status</th><th>Alterar</th></tr>
+        </thead>
+        <tbody id="admin-pedidos"></tbody>
+      </table>
+    </section>
+    <section class="painel admin-secao formulario" id="secao-cadastro" role="tabpanel" aria-labelledby="tab-cadastro" tabindex="0" hidden>
+      <h1 id="titulo-form-produto">Cadastrar produto</h1>
       <form id="form-produto-admin">
         <input type="hidden" name="produto_id">
         <label>Nome do produto <input name="nome" required></label>
@@ -42,21 +51,6 @@
           <button class="btn btn-claro" id="btn-cancelar-edicao" type="button" hidden>Cancelar edição</button>
         </div>
       </form>
-    </section>
-    <section class="painel" id="secao-pedidos" style="margin-top:18px">
-      <h2>Pedidos da loja</h2>
-      <p class="ajuda">Atualize o andamento da preparação e da retirada.</p>
-      <table class="admin-tabela">
-        <thead>
-          <tr><th>Nº</th><th>Cliente</th><th>Data</th><th>Total</th><th>Pagamento</th><th>Recebimento</th><th>Status</th><th>Alterar</th></tr>
-        </thead>
-        <tbody id="admin-pedidos"></tbody>
-      </table>
-    </section>
-    <section class="painel" id="secao-catalogo" style="margin-top:18px">
-      <h2>Produtos do catálogo</h2>
-      <p class="ajuda">Visualize, edite ou remova os produtos disponíveis na loja.</p>
-      <div id="admin-produtos" class="grade"></div>
     </section>
   </main>
   <footer id="site-footer"></footer>

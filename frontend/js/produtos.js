@@ -61,6 +61,46 @@ async function listarProdutos(params = {}) {
   return dados.produtos;
 }
 
+function executarAdicao(botao, produto, textoSucesso = "Adicionado") {
+  if (botao.dataset.adicionando === "1") return;
+
+  const original = botao.innerHTML;
+  const tamanho = botao.getBoundingClientRect();
+  botao.style.width = `${tamanho.width}px`;
+  botao.style.height = `${tamanho.height}px`;
+  botao.dataset.adicionando = "1";
+  botao.disabled = true;
+  botao.setAttribute("aria-busy", "true");
+  botao.innerHTML = '<span class="spinner-adicionar" aria-label="Carregando"></span>';
+  void botao.offsetWidth;
+
+  clearTimeout(botao._timerAdicao);
+  botao._timerAdicao = setTimeout(() => {
+    try {
+      Carrinho.adicionar(produto, 1);
+      botao.innerHTML = textoSucesso;
+      botao.setAttribute("aria-label", textoSucesso);
+
+      botao._timerAdicao = setTimeout(() => {
+        botao.innerHTML = original;
+        botao.removeAttribute("aria-label");
+        botao.removeAttribute("aria-busy");
+        botao.disabled = false;
+        delete botao.dataset.adicionando;
+        botao.style.width = "";
+        botao.style.height = "";
+      }, 1200);
+    } catch (_erro) {
+      botao.innerHTML = original;
+      botao.removeAttribute("aria-busy");
+      botao.disabled = false;
+      delete botao.dataset.adicionando;
+      botao.style.width = "";
+      botao.style.height = "";
+    }
+  }, 550);
+}
+
 function ligarCards(produtos, destino) {
   destino._produtos = Object.assign(destino._produtos || {}, Object.fromEntries(produtos.map((p) => [String(p.id), p])));
   if (destino.dataset.ligado === "1") return;
@@ -72,10 +112,7 @@ function ligarCards(produtos, destino) {
     if (add) {
       const p = mapa[add.dataset.add];
       if (!p) return;
-      Carrinho.adicionar(p, 1);
-      const original = add.innerHTML;
-      add.innerHTML = original.replace("Adicionar", "Adicionado");
-      setTimeout(() => { add.innerHTML = original; }, 1200);
+      executarAdicao(add, p);
     }
     if (det) abrirDetalhe(mapa[det.dataset.detalhe]);
   });
@@ -106,9 +143,8 @@ function abrirDetalhe(p) {
     </div>`;
   modal.classList.add("aberto");
   modal.querySelector("#modal-fechar").onclick = () => modal.classList.remove("aberto");
-  modal.querySelector("#modal-add").onclick = () => {
-    Carrinho.adicionar(p, 1);
-    modal.classList.remove("aberto");
+  modal.querySelector("#modal-add").onclick = (evento) => {
+    executarAdicao(evento.currentTarget, p);
   };
   modal.onclick = (e) => { if (e.target === modal) modal.classList.remove("aberto"); };
 }
