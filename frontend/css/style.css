@@ -711,12 +711,15 @@ textarea {
   margin: 14px 0;
 }
 .etapa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #eef1ee;
   color: #667;
   border-radius: 12px;
   padding: 10px;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 16px;
   font-weight: 800;
 }
 .etapa.concluida {
@@ -734,6 +737,28 @@ textarea {
 }
 .pedido-card {
   margin-bottom: 12px;
+}
+.pedido-miniaturas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.pedido-miniaturas img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid var(--linha);
+  border-radius: 8px;
+}
+.pedido-miniaturas-mais {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  color: var(--mudo);
+  font-weight: 800;
 }
 .confirmacao {
   text-align: center;
