@@ -1,0 +1,8 @@
+/* Complementos visuais da identidade da quitanda. */
+.lista-simples { color: var(--mudo); }
+.admin-produto { min-height: 320px; }
+.admin-acoes { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.btn-excluir { background: #fde8ea; color: #8a2432; border: 1px solid #f4c8ce; }
+.admin-secao { margin-top: 18px; }
+.admin-secao h1 { margin-top: 0; }
+.admin-secao[hidden] { display: none; }
