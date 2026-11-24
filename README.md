@@ -1,113 +1,231 @@
 # Quitanda da Liro
 
-Sistema web de compras com retirada presencial. O cliente consulta produtos, monta o carrinhos de compras, confirma o pedido na loja e acompanha o status até a retirada. Não há entrega em domicílio nem pagamento online.
+Aplicação web de venda presencial para uma quitanda. O sistema permite consultar produtos, montar um carrinho, cadastrar uma conta, entrar no perfil, criar pedidos e acompanhar o andamento da retirada.
 
-## O que já existia // rever
+O pagamento não ocorre pela internet: PIX, cartão ou dinheiro são pagos no caixa da loja. Não há entrega em domicílio.
 
-- CRUD de produtos em Python (`banco.py` / `menu.py`)
-- Tabela `produtos`: `id`, `nome`, `categoria`, `preco`, `unidade_medida`
-- Banco SQLite em `backend/database/quitanda.db`, preservando o arquivo legado
-  quando encontrado na raiz
+## Funcionalidades
 
-## O que foi feito //// rever essa parte e retirar/alterar
+- Catálogo público de hortifrúti, bebidas e produtos de limpeza
+- Pesquisa de produtos por nome e categoria
+- Carrinho de compras no navegador
+- Cadastro, login, perfil e encerramento de sessão
+- Criação de pedidos com cálculo de valores no servidor
+- Consulta de pedidos pelo cliente
+- Área administrativa para cadastrar produtos e alterar o status dos pedidos
+- Persistência dos dados em SQLite
+- Documentação automática das rotas em Swagger UI
 
-- Correção do texto do menu (`Produto atualizado` / `Produto nao encontrado`)
-- Função `buscar_produtos()` para pesquisa por nome e categoria, mantendo `buscar_produto(id)`
-- `UPDATE` de produto sem vírgula inválida antes do `WHERE`
-- Ampliação do mesmo SQLite com usuários, sessões, pedidos e itens
-- API REST em Python (`backend/api.py`) servindo JSON e o front-end
-- Site em HTML, CSS e JavaScript puros
+## Tecnologias
 
-Endereço, horário e telefone **não estavam no projeto original**. Ficam em `backend/config.py` para a tela de retirada.
+| Camada | Tecnologia |
+|---|---|
+| Interface web | HTML5, CSS3 e JavaScript |
+| API | Python 3.13, FastAPI |
+| Servidor HTTP | Uvicorn |
+| Banco de dados | SQLite |
+| Gerenciamento do projeto | pyproject.toml e uv |
+| Interface da API | Swagger UI em /docs |
 
-## Como executar
+## Pré-requisitos
 
-Python 3.13 (ou 3.10+). Sem bibliotecas extras.
+- Python 3.13 recomendado
+- git
+- Navegador web moderno
+- uv recomendado, mas não obrigatório
 
-```bash
-cd backend
-python api.py
-```
+Para Windows com bloqueio do executável python.exe, o launcher py pode ser usado.
 
-No Windows, se `python.exe` estiver bloqueado pela política de Controle de
-Aplicativos, use o launcher do Python:
+## Como rodar
+### Servidor principal
 
-```bash
-cd backend
-py api.py
-```
+Com uv:
 
-Se `py api.py` também for bloqueado, consulte o administrador do computador.
-Não desative o Controle de Aplicativos ou o Defender sem autorização.
+uv run python backend/api.py
+Ou, após ativar o ambiente virtual:
 
-Abra http://127.0.0.1:8000
+python backend/api.py
+No Windows:
 
-Não abra `frontend/index.html` diretamente pelo explorador de arquivos: as
-páginas precisam ser acessadas pelo servidor Python para que a API, o login,
-o carrinho e os pedidos funcionem corretamente.
+py backend/api.py
+Depois, acesse:
 
-Na primeira execução o sistema:
+- Site: http://127.0.0.1:8000
+- Catálogo: http://127.0.0.1:8000/pages/produtos.html
+- Documentação da API: http://127.0.0.1:8000/docs
+- Documentação JSON: http://127.0.0.1:8000/openapi.json
 
-1. Usa `backend/database/quitanda.db`; se ele não existir, copia o `quitanda.db`
-   legado da raiz antes de criar um banco novo
-2. Mantém a tabela `produtos`
-3. Cria as tabelas novas
-4. Se não houver produtos, carrega um catálogo inicial
-5. Cria o administrador padrão
+Não abra os arquivos HTML diretamente pelo explorador. O servidor é necessário para disponibilizar a API, autenticação, carrinho e pedidos.
 
-Menu de terminal (CRUD original):
+Para interromper o servidor, use Ctrl+C no terminal.
 
-```bash
-python menu.py
-```
+### Menu de terminal
 
-ou:
+O CRUD original também está disponível no terminal:
 
-```bash
-cd backend
-python menu.py
-```
+python backend/menu.py
+## Contas disponíveis
 
-## Conta administrativa
+Na primeira execução de um banco vazio, o sistema cria duas contas para testes.
 
-- E-mail: `admin@quitandaliro.local`
-- Senha: `AdminLiro123`
+### Administrador
 
-Use essa conta em `/pages/admin.html` para cadastrar produtos e atualizar o status dos pedidos.
+- E-mail: admin@quitandaliro.local
+- Senha: AdminLiro123
+- Área administrativa: http://127.0.0.1:8000/pages/admin.html
 
-## Conta de cliente para testes
+O administrador pode cadastrar produtos e atualizar o status dos pedidos.
 
-- E-mail: `cliente@quitandaliro.local`
-- Senha: `Cliente123`
+### Cliente
+
+- E-mail: cliente@quitandaliro.local
+- Senha: Cliente123
+
+As senhas são credenciais locais de desenvolvimento. Em produção, devem ser alteradas e o sistema deve usar configuração segura de ambientes.
+
+## Fluxo de uso
+
+1. Abra o site pela URL local do servidor.
+2. Consulte os produtos no catálogo.
+3. Adicione itens ao carrinho.
+4. Faça cadastro ou login.
+5. Confirme o pedido na página de checkout.
+6. Consulte o pedido em Meus pedidos.
+7. Pague no caixa no momento da retirada.
+8. Use a área administrativa para preparar o pedido e indicar quando ele estiver disponível ou retirado.
 
 ## Status dos pedidos
 
-1. Pedido realizado
-2. Em preparação
-3. Aguardando retirada na loja
-4. Pedido retirado
-5. Cancelado (quando aplicável)
+1. realizado — Pedido realizado
+2. em_preparacao — Em preparação
+3. aguardando_retirada — Aguardando retirada na loja
+4. retirado — Pedido retirado
+5. cancelado — Pedido cancelado
 
-Não existe status de entrega em domicílio.
+Não existe entrega em domicílio.
 
-## Pagamento
+## Arquitetura
 
-PIX, cartão ou dinheiro **somente no caixa da loja**, na retirada. O site não coleta dados bancários.
+Navegador
+   |
+   | HTTP/JSON
+   v
+FastAPI + Uvicorn
+   |
+   +--> SQLite
+   |
+   +--> Frontend estático
+O [frontend](frontend/) envia requisições às rotas /api usando os arquivos JavaScript. A API valida os dados, autentica usuários e executa as operações no banco. Os módulos [backend/banco.py](backend/banco.py), [backend/auth.py](backend/auth.py) e [backend/pedidos.py](backend/pedidos.py) concentram o acesso ao SQLite e às regras de negócio.
 
-## Estrutura
+## Estrutura do repositório
 
-```text
+`text
 crud-quitanda-liro/
-├── banco.py / menu.py     # atalhos do CRUD original
 ├── backend/
-│   ├── api.py
-│   ├── banco.py
-│   ├── menu.py
-│   ├── auth.py
-│   ├── pedidos.py
-│   ├── config.py
+│   ├── api.py                 # Aplicação FastAPI e rotas HTTP
+│   ├── auth.py                # Usuários, senhas e sessões
+│   ├── banco.py               # Conexão SQLite e operações de produtos
+│   ├── pedidos.py             # Criação e consulta de pedidos
+│   ├── config.py              # Dados da loja, categorias e status
+│   ├── menu.py                # CRUD disponível no terminal
+│   ├── requirements.txt       # Dependências opcionais para pip
 │   └── database/
-└── frontend/
-```
+│       ├── quitanda.db        # Banco local
+│       └── MIGRACOES.md       # Histórico das alterações do banco
+├── frontend/
+│   ├── index.html             # Página inicial
+│   ├── assets/                # Imagens e ícones
+│   ├── css/                   # Estilos do site
+│   ├── js/                    # Comunicação com API e comportamento das páginas
+│   └── pages/                 # Páginas de login, carrinho, pedidos e administração
+├── src/quitanda_liro/
+│   └── init.py            # Entrada do pacote distribuível
+├── pyproject.toml             # Metadados e dependências do projeto
+├── uv.lock                    # Dependências resolvidas pelo uv
+└── README.md                  # Manual e apresentação do projeto
 
-Alterações do banco: `backend/database/MIGRACOES.md`.
+## Banco de dados
+
+O banco oficial é criado ou reutilizado em [backend/database/quitanda.db](backend/database/quitanda.db).
+
+Na primeira execução:
+
+1. O sistema procura pelo banco oficial.
+2. Caso ele não exista, tenta copiar um arquivo legado `quitanda.db` da raiz.
+3. Cria as tabelas necessárias caso ainda não existam.
+4. Mantém os produtos já cadastrados.
+5. Cria o catálogo inicial apenas quando não houver produtos.
+6. Cria o administrador e o cliente padrão quando não houver usuários.
+
+O modelo inclui tabelas para produtos, usuários, sessões, pedidos, itens de pedidos e histórico de migrações. Consulte [backend/database/MIGRACOES.md](backend/database/MIGRACOES.md) para o detalhamento.
+
+## Documentação
+
+A documentação interativa do servidor permite consultar e testar os endpoints, parâmetros e modelos da API diretamente no navegador.
+
+### Como abrir o Swagger UI
+
+1. Inicie o servidor principal:
+
+   
+bash
+   uv run python backend/api.py
+  
+
+2. Aguarde aparecer no terminal a mensagem informando que o Uvicorn está executando em `http://127.0.0.1:8000`.
+3. Abra o navegador.
+4. Digite o seguinte endereço na barra de endereços:
+
+   
+text
+   http://127.0.0.1:8000/docs
+  
+
+5. Pressione `Enter`.
+
+O Swagger UI deve aparecer com os grupos de rotas disponíveis, como **loja**, **produtos**, **usuários** e **pedidos**. Para testar uma rota:
+
+1. Expanda o grupo e a rota desejada.
+2. Clique em **Try it out**.
+3. Preencha os parâmetros ou o corpo da requisição, quando necessário.
+4. Clique em **Execute**.
+5. Consulte a resposta, o código HTTP e o exemplo retornado pela API.
+
+Para testar rotas protegidas, faça login antes e informe o token recebido no campo **Authorize** do Swagger UI.
+
+- Swagger UI: http://127.0.0.1:8000/docs
+- OpenAPI: http://127.0.0.1:8000/openapi.json
+- Migrações do banco: [backend/database/MIGRACOES.md](backend/database/MIGRACOES.md)
+
+Principais grupos de rotas:
+
+| Grupo | Exemplos |
+|---|---|
+| Loja | `GET /api/loja` |
+| Produtos | `GET /api/produtos`, `POST /api/produtos` |
+| Usuários | `POST /api/usuarios`, `POST /api/login`, `POST /api/logout` |
+| Perfil | `GET /api/me`, `PUT /api/me` |
+| Pedidos | `GET /api/pedidos`, `POST /api/pedidos` |
+| Administração | `GET /api/admin/pedidos`, `PATCH /api/pedidos/{id}/status` |
+
+As operações administrativas exigem uma sessão autenticada com perfil `admin`.
+
+## Dicas de desenvolvimento
+
+Com o servidor ativo, alterações em arquivos Python normalmente exigem reiniciar o processo. Para revisar a sintaxe do backend:
+
+bash
+uv run python -m compileall -q backend src
+
+Para executar diretamente pela aplicação declarada no projeto:
+
+bash
+uv run quitanda-liro
+`
+
+## Limitações conhecidas
+- O servidor usa SQLite, adequado para desenvolvimento e aplicações locais de baixo volume.
+- A aplicação não processa pagamentos online.
+- A aplicação não realiza entrega em domicílio.
+- O projeto não inclui implantação em nuvem ou Docker.
+- Os dados de loja exibidos em backend/config.py são exemplos e devem ser substituídos antes de uso real.
