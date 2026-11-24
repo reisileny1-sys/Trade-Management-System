@@ -1,3 +1,2 @@
-# A API usa apenas a biblioteca padrão do Python 3.13
-# (http.server, sqlite3, hashlib, json).
-# Nenhuma dependência extra é necessária para executar o sistema.
+fastapi>=0.115
+uvicorn[standard]>=0.30

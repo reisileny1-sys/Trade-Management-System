@@ -1,4 +1,8 @@
-"""Dados cadastrais da loja."""
+"""Dados cadastrais da loja.
+
+O projeto original não continha endereço, telefone nem horário.
+Estes valores ficam centralizados aqui para a retirada presencial.
+"""
 
 LOJA = {
     "nome": "Quitanda da Liro",

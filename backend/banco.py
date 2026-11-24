@@ -165,12 +165,14 @@ def inicializar_banco() -> None:
             if descricao not in existentes:
                 _registrar_migracao(conexao, descricao)
 
-        if conexao.execute("SELECT COUNT(*) AS n FROM produtos").fetchone()["n"] == 0:
+        if "catalogo inicial: produtos ativos sincronizados" not in existentes:
             _popular_produtos_iniciais(conexao)
             _registrar_migracao(
                 conexao,
-                "carga inicial de produtos (quitanda.db original não estava versionado)",
+                "catalogo inicial: produtos ativos sincronizados",
             )
+        else:
+            _popular_produtos_iniciais(conexao)
 
         if conexao.execute("SELECT COUNT(*) AS n FROM usuarios").fetchone()["n"] == 0:
             from auth import hash_senha
@@ -290,13 +292,89 @@ def _popular_produtos_iniciais(conexao) -> None:
         ("Esponja dupla face", "Limpeza", 1.80, "unidade", "Pacote com unidade avulsa.", "esponja.svg"),
         ("Desinfetante 2 L", "Limpeza", 8.50, "L", "Aroma suave para o chão.", "desinfetante.svg"),
     ]
-    conexao.executemany(
-        """
-        INSERT INTO produtos (nome, categoria, preco, unidade_medida, descricao, imagem)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        itens,
-    )
+    def chave_nome(nome: str) -> str:
+        normalizado = unicodedata.normalize("NFKD", nome.strip().lower())
+        return "".join(
+            caractere
+            for caractere in normalizado
+            if unicodedata.category(caractere) != "Mn"
+        )
+
+    linhas = conexao.execute("SELECT id, nome FROM produtos").fetchall()
+    existentes_por_nome = {chave_nome(linha["nome"]): linha["id"] for linha in linhas}
+
+    for nome, categoria, preco, unidade, descricao, imagem in itens:
+        chave = chave_nome(nome)
+        produto_id = None
+
+        if categoria == "Bebidas":
+            if chave.startswith("agua mineral"):
+                candidato = next(
+                    (
+                        linha
+                        for linha in linhas
+                        if chave_nome(linha["nome"]) in {"agua", "gua"}
+                        or "gua" in chave_nome(linha["nome"])
+                        or "\ufffdgua" in chave_nome(linha["nome"])
+                    ),
+                    None,
+                )
+            elif chave.startswith("refrigerante"):
+                candidato = next(
+                    (
+                        linha
+                        for linha in linhas
+                        if chave_nome(linha["nome"]) == "refrigerante"
+                    ),
+                    None,
+                )
+            else:
+                candidato = None
+            if candidato is not None:
+                produto_id = candidato["id"]
+
+        if produto_id is None:
+            produto_id = existentes_por_nome.get(chave)
+
+        if produto_id is not None:
+            conexao.execute(
+                """
+                UPDATE produtos
+                SET nome = ?, categoria = ?, preco = ?, unidade_medida = ?,
+                    descricao = ?, imagem = ?, ativo = 1
+                WHERE id = ?
+                """,
+                (
+                    nome,
+                    categoria,
+                    preco,
+                    unidade,
+                    descricao,
+                    imagem,
+                    produto_id,
+                ),
+            )
+            duplicados = conexao.execute(
+                "SELECT id, nome FROM produtos WHERE id <> ?",
+                (produto_id,),
+            ).fetchall()
+            for duplicado in duplicados:
+                if chave_nome(duplicado["nome"]) == chave:
+                    conexao.execute(
+                        "UPDATE produtos SET ativo = 0 WHERE id = ?",
+                        (duplicado["id"],),
+                    )
+            existentes_por_nome[chave] = produto_id
+        else:
+            cursor = conexao.execute(
+                """
+                INSERT INTO produtos
+                    (nome, categoria, preco, unidade_medida, descricao, imagem, ativo)
+                VALUES (?, ?, ?, ?, ?, ?, 1)
+                """,
+                (nome, categoria, preco, unidade, descricao, imagem),
+            )
+            existentes_por_nome[chave] = cursor.lastrowid
 
 
 def inserir_produto(

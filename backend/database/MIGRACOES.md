@@ -1,7 +1,7 @@
 # Alterações no banco `quitanda.db`
 
 O arquivo original `quitanda.db` não estava versionado (constava no `.gitignore`).
-A tabela `produtos` foi recriada com os mesmos campos do `banco.py` inicial:
+A tabela `produtos` foi recriada com os mesmos campos do `backend/banco.py` inicial:
 
 - `id`, `nome`, `categoria`, `preco`, `unidade_medida`
 
@@ -23,6 +23,10 @@ Relacionamentos:
 
 Produtos excluídos ficam com `ativo = 0`: não aparecem no catálogo nem podem ser
 adicionados a novos pedidos, mas continuam disponíveis para os pedidos antigos.
+
+Na inicialização, o catálogo inicial é sincronizado pelo nome: produtos existentes
+do catálogo são reativados e os itens iniciais ausentes são inseridos como ativos.
+Itens cadastrados pelo usuário continuam preservados e não são removidos.
 
 O arquivo oficial fica em `backend/database/quitanda.db`. Na primeira execução,
 se o banco legado `quitanda.db` existir na raiz e o arquivo oficial ainda não
