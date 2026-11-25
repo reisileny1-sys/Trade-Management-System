@@ -575,6 +575,10 @@ textarea {
   border: 1px solid var(--linha);
   background: #fff;
 }
+.formulario input[readonly] {
+  background: #f7f8f7;
+  cursor: not-allowed;
+}
 .msg {
   padding: 12px 14px;
   border-radius: 12px;

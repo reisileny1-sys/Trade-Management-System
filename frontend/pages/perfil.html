@@ -19,21 +19,39 @@
       <div id="msg-auth" hidden></div>
       <form id="form-perfil">
         <label for="nome_completo">Nome completo</label>
-        <input id="nome_completo" name="nome_completo" required>
+        <input id="nome_completo" name="nome_completo" required readonly>
         <label for="cpf">CPF</label>
         <input id="cpf" name="cpf" readonly>
         <label for="celular">Celular</label>
-        <input id="celular" name="celular" required>
+        <input id="celular" name="celular" required readonly>
         <label for="email">E-mail</label>
-        <input id="email" name="email" type="email" required>
+        <input id="email" name="email" type="email" required readonly>
         <div class="acoes-form acoes-perfil">
-          <button class="btn btn-verde" type="submit">Salvar</button>
+          <button class="btn btn-verde" id="btn-atualizar-conta" type="submit">Atualizar conta</button>
           <button class="btn btn-claro" id="btn-sair" type="button">Sair da conta</button>
           <button class="btn btn-excluir" id="btn-excluir-conta" type="button">Excluir conta</button>
         </div>
       </form>
     </section>
   </main>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-confirmacao-atualizacao"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-confirmacao-atualizacao"
+    aria-describedby="texto-confirmacao-atualizacao"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-confirmacao-atualizacao">Confirmar atualização</h2>
+      <p id="texto-confirmacao-atualizacao">Tem certeza de que deseja atualizar sua conta?</p>
+      <div class="acoes-form">
+        <button class="btn btn-verde" id="confirmar-atualizacao" type="button">Sim</button>
+        <button class="btn btn-claro" id="cancelar-atualizacao" type="button">Não</button>
+      </div>
+    </div>
+  </div>
   <div
     class="modal modal-confirmacao"
     id="modal-excluir-conta"
@@ -55,6 +73,6 @@
   <script src="../js/api.js?v=2"></script>
   <script src="../js/carrinho.js"></script>
   <script src="../js/app.js?v=7"></script>
-  <script src="../js/auth.js?v=2"></script>
+  <script src="../js/auth.js?v=4"></script>
 </body>
 </html>
