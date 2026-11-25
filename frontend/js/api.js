@@ -35,9 +35,9 @@ const Api = (() => {
     patch: (c, corpo) => pedir(c, { method: "PATCH", body: JSON.stringify(corpo || {}) }),
     del: (c) => pedir(c, { method: "DELETE" }),
     imagem(nome) {
-      if (!nome) return `${raiz || "."}/assets/images/cesta.svg`;
+      if (!nome) return `${raiz || "."}/assets/imagens/cesta.svg`;
       if (nome.startsWith("http")) return nome;
-      return `${raiz || "."}/assets/images/${nome}`;
+      return `${raiz || "."}/assets/imagens/${nome}`;
     },
     dinheiro(valor) {
       return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

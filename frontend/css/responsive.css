@@ -6,22 +6,15 @@
   .header-inner > .marca { grid-column: 1; }
   .header-inner > .acoes-topo { grid-column: 2; }
   .busca { grid-column: 1 / -1; }
-  .hero-banner, .promos, .duas-colunas, .rodape-grid { grid-template-columns: 1fr; }
-  .hero-banner { min-height: 520px; align-content: start; }
-  .hero-imagem { right: 16px; bottom: -4px; width: 72%; height: 280px; }
-  .hero-imagem img { max-height: 280px; }
-  .hero-artes { height: 140px; }
-  .arte.folha { left: 8%; top: 10px; font-size: 78px; }
-  .arte.morango { right: 8%; top: 0; font-size: 86px; }
+  .promos, .duas-colunas, .rodape-grid { grid-template-columns: 1fr; }
   .grade { grid-template-columns: repeat(2, 1fr); }
   .nav-main { gap: 14px; overflow-x: auto; font-size: 0.92rem; }
   .timeline { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 520px) {
-  .hero-banner { min-height: 500px; padding: 32px 24px; }
-  .hero-imagem { width: 96%; height: 240px; }
-  .hero-imagem img { max-height: 240px; }
+  .btn-rosa { left: 3%; bottom: 2%; padding: 5px 9px; font-size: 0.72rem; }
   .grade { grid-template-columns: 1fr; }
   .marca strong { font-size: 1.15rem; }
   .btn-outline span.rotulo { display: none; }
+  .admin-header-inner .btn-outline span.rotulo { display: inline; }
 }

@@ -34,7 +34,8 @@ const Auth = {
   },
 };
 
-function destinoAposLogin() {
+function destinoAposLogin(usuario) {
+  if (usuario.perfil === "admin") return Api.caminho("pages/admin.html");
   const next = new URLSearchParams(location.search).get("next");
   if (next && next.startsWith("/")) return next;
   return Api.caminho("index.html");
@@ -45,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cadastro = document.getElementById("form-cadastro");
   const perfil = document.getElementById("form-perfil");
   const sair = document.getElementById("btn-sair");
+  const excluirConta = document.getElementById("btn-excluir-conta");
 
   login?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -55,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         senha: login.senha.value,
       });
       Auth.guardar(dados.usuario, dados.token);
-      location.href = destinoAposLogin();
+      location.href = destinoAposLogin(dados.usuario);
     } catch (erro) {
       mostrarMsg(msg, erro.message, "erro");
     }
@@ -113,6 +115,60 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (erro) {
         mostrarMsg(document.getElementById("msg-auth"), erro.message, "erro");
       }
+    });
+
+    const modalExclusao = document.getElementById("modal-excluir-conta");
+    const confirmarExclusao = document.getElementById("confirmar-excluir-conta");
+    const cancelarExclusao = document.getElementById("cancelar-excluir-conta");
+
+    function fecharModalExclusao() {
+      modalExclusao.classList.remove("aberto");
+      excluirConta.focus();
+    }
+
+    excluirConta.addEventListener("click", () => {
+      modalExclusao.classList.add("aberto");
+      cancelarExclusao.focus();
+    });
+    cancelarExclusao.addEventListener("click", fecharModalExclusao);
+    modalExclusao.addEventListener("click", (ev) => {
+      if (ev.target === modalExclusao) fecharModalExclusao();
+    });
+    document.addEventListener("keydown", (ev) => {
+      if (!modalExclusao.classList.contains("aberto")) return;
+      if (ev.key === "Escape") {
+        ev.preventDefault();
+        fecharModalExclusao();
+      } else if (ev.key === "Tab") {
+        const focoNoSim = document.activeElement === confirmarExclusao;
+        const focoNoNao = document.activeElement === cancelarExclusao;
+        if (ev.shiftKey && focoNoSim) {
+          ev.preventDefault();
+          cancelarExclusao.focus();
+        } else if (!ev.shiftKey && focoNoNao) {
+          ev.preventDefault();
+          confirmarExclusao.focus();
+        }
+      }
+    });
+    confirmarExclusao.addEventListener("click", async () => {
+      confirmarExclusao.disabled = true;
+      cancelarExclusao.disabled = true;
+      try {
+        await Api.del("/me");
+      } catch (erro) {
+        modalExclusao.classList.remove("aberto");
+        mostrarMsg(document.getElementById("msg-auth"), erro.message, "erro");
+        confirmarExclusao.disabled = false;
+        cancelarExclusao.disabled = false;
+        excluirConta.focus();
+        return;
+      }
+      Auth.limpar();
+      Carrinho.limpar();
+      sessionStorage.removeItem("quitanda_ultimo_pedido");
+      sessionStorage.removeItem("quitanda_idem");
+      location.href = Api.caminho("index.html");
     });
   }
 

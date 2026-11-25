@@ -174,6 +174,31 @@ def encerrar_sessao(token: str | None) -> None:
     conexao.close()
 
 
+def excluir_conta(usuario_id: int) -> None:
+    conexao = banco.conectar()
+    try:
+        existe = conexao.execute(
+            "SELECT id FROM usuarios WHERE id = ?",
+            (usuario_id,),
+        ).fetchone()
+        if existe is None:
+            raise ValueError("Usuário não encontrado.")
+
+        conexao.execute(
+            """
+            DELETE FROM itens_pedido
+            WHERE pedido_id IN (SELECT id FROM pedidos WHERE usuario_id = ?)
+            """,
+            (usuario_id,),
+        )
+        conexao.execute("DELETE FROM pedidos WHERE usuario_id = ?", (usuario_id,))
+        conexao.execute("DELETE FROM sessoes WHERE usuario_id = ?", (usuario_id,))
+        conexao.execute("DELETE FROM usuarios WHERE id = ?", (usuario_id,))
+        conexao.commit()
+    finally:
+        conexao.close()
+
+
 def atualizar_perfil(usuario_id: int, nome_completo: str, celular: str, email: str) -> dict:
     email_n = email.strip().lower()
     if not email_valido(email_n):

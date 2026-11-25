@@ -30,18 +30,23 @@ function pertenceGrupo(produto, grupo) {
 
 function cardProduto(p) {
   const unidade = (p.unidade_medida || "").toLowerCase() === "unidade" ? "unidade" : p.unidade_medida;
+  const pesoGramas = { "200g": 200, "500g": 500 }[(p.unidade_medida || "").trim().toLowerCase()];
+  const precoPorQuilo = (p.categoria || "").toLowerCase().includes("horti") && pesoGramas
+    ? Number(p.preco) * 1000 / pesoGramas
+    : null;
   const imagem = p.imagem
     ? `<img src="${Api.imagem(p.imagem)}" alt="${p.nome}">`
     : emojiProduto(p.nome);
   return `
     <article class="produto-card">
       <div class="produto-foto">${imagem}
+        <span class="cat-rosa categoria-pill">${p.categoria}</span>
         <span class="unidade-pill">${unidade}</span>
       </div>
       <div class="produto-corpo">
         <h3>${p.nome}</h3>
         <div class="preco">${Api.dinheiro(p.preco)}</div>
-        <div class="cat-rosa">${p.categoria}</div>
+        ${precoPorQuilo === null ? "" : `<div class="preco-quilo">${Api.dinheiro(precoPorQuilo)}/Quilo</div>`}
         <button class="btn-add" data-add="${p.id}" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7L5 4H2"/><circle cx="9" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg>
           Adicionar

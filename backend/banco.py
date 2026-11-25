@@ -170,25 +170,26 @@ def inicializar_banco() -> None:
         else:
             _popular_produtos_iniciais(conexao)
 
-        if conexao.execute("SELECT COUNT(*) AS n FROM usuarios").fetchone()["n"] == 0:
-            from auth import hash_senha
+        if "usuario administrador inicial" not in existentes:
+            if conexao.execute("SELECT COUNT(*) AS n FROM usuarios").fetchone()["n"] == 0:
+                from auth import hash_senha
 
-            agora = datetime.now(timezone.utc).isoformat()
-            conexao.execute(
-                """
-                INSERT INTO usuarios
-                    (nome_completo, cpf, celular, email, senha_hash, perfil, criado_em)
-                VALUES (?, ?, ?, ?, ?, 'admin', ?)
-                """,
-                (
-                    ADMIN_PADRAO["nome_completo"],
-                    ADMIN_PADRAO["cpf"],
-                    ADMIN_PADRAO["celular"],
-                    ADMIN_PADRAO["email"],
-                    hash_senha(ADMIN_PADRAO["senha"]),
-                    agora,
-                ),
-            )
+                agora = datetime.now(timezone.utc).isoformat()
+                conexao.execute(
+                    """
+                    INSERT INTO usuarios
+                        (nome_completo, cpf, celular, email, senha_hash, perfil, criado_em)
+                    VALUES (?, ?, ?, ?, ?, 'admin', ?)
+                    """,
+                    (
+                        ADMIN_PADRAO["nome_completo"],
+                        ADMIN_PADRAO["cpf"],
+                        ADMIN_PADRAO["celular"],
+                        ADMIN_PADRAO["email"],
+                        hash_senha(ADMIN_PADRAO["senha"]),
+                        agora,
+                    ),
+                )
             _registrar_migracao(conexao, "usuario administrador inicial")
 
         conexao.commit()

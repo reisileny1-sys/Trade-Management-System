@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/responsive.css">
 </head>
-<body data-root="..">
+<body data-root=".." data-page="perfil">
   <header id="site-header"></header>
   <main class="container" style="max-width:560px">
     <section class="painel formulario">
@@ -26,17 +26,35 @@
         <input id="celular" name="celular" required>
         <label for="email">E-mail</label>
         <input id="email" name="email" type="email" required>
-        <div class="acoes-form">
+        <div class="acoes-form acoes-perfil">
           <button class="btn btn-verde" type="submit">Salvar</button>
           <button class="btn btn-claro" id="btn-sair" type="button">Sair da conta</button>
+          <button class="btn btn-excluir" id="btn-excluir-conta" type="button">Excluir conta</button>
         </div>
       </form>
     </section>
   </main>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-excluir-conta"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-excluir-conta"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-excluir-conta">Excluir conta?</h2>
+      <p>Tem certeza de que deseja excluir sua conta? Seus dados e histórico de pedidos serão apagados definitivamente.</p>
+      <div class="acoes-form">
+        <button class="btn btn-excluir" id="confirmar-excluir-conta" type="button">Sim</button>
+        <button class="btn btn-claro" id="cancelar-excluir-conta" type="button">Não</button>
+      </div>
+    </div>
+  </div>
   <footer id="site-footer"></footer>
   <script src="../js/api.js?v=2"></script>
   <script src="../js/carrinho.js"></script>
-  <script src="../js/app.js?v=4"></script>
-  <script src="../js/auth.js"></script>
+  <script src="../js/app.js?v=7"></script>
+  <script src="../js/auth.js?v=2"></script>
 </body>
 </html>
