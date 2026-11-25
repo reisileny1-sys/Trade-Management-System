@@ -38,8 +38,7 @@ def conectar():
 
 def criar_tabela():
     conexao = conectar()
-    conexao.execute(
-        """
+    conexao.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             id     INTEGER PRIMARY KEY AUTOINCREMENT,
             nome   TEXT NOT NULL,
@@ -48,8 +47,7 @@ def criar_tabela():
             unidade_medida  TEXT NOT NULL,
             ativo INTEGER NOT NULL DEFAULT 1
         )
-        """
-    )
+        """)
     conexao.commit()
     conexao.close()
 
@@ -71,15 +69,13 @@ def inicializar_banco() -> None:
     criar_tabela()
     conexao = conectar()
     try:
-        conexao.execute(
-            """
+        conexao.execute("""
             CREATE TABLE IF NOT EXISTS schema_migracoes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 descricao TEXT NOT NULL,
                 aplicado_em TEXT NOT NULL
             )
-            """
-        )
+            """)
 
         colunas_produto = _colunas(conexao, "produtos")
         if "descricao" not in colunas_produto:
@@ -89,11 +85,12 @@ def inicializar_banco() -> None:
             conexao.execute("ALTER TABLE produtos ADD COLUMN imagem TEXT")
             _registrar_migracao(conexao, "produtos: coluna imagem")
         if "ativo" not in colunas_produto:
-            conexao.execute("ALTER TABLE produtos ADD COLUMN ativo INTEGER NOT NULL DEFAULT 1")
+            conexao.execute(
+                "ALTER TABLE produtos ADD COLUMN ativo INTEGER NOT NULL DEFAULT 1"
+            )
             _registrar_migracao(conexao, "produtos: coluna ativo")
 
-        conexao.execute(
-            """
+        conexao.execute("""
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome_completo TEXT NOT NULL,
@@ -104,10 +101,8 @@ def inicializar_banco() -> None:
                 perfil TEXT NOT NULL DEFAULT 'cliente',
                 criado_em TEXT NOT NULL
             )
-            """
-        )
-        conexao.execute(
-            """
+            """)
+        conexao.execute("""
             CREATE TABLE IF NOT EXISTS sessoes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 usuario_id INTEGER NOT NULL,
@@ -116,10 +111,8 @@ def inicializar_banco() -> None:
                 expira_em TEXT NOT NULL,
                 FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
             )
-            """
-        )
-        conexao.execute(
-            """
+            """)
+        conexao.execute("""
             CREATE TABLE IF NOT EXISTS pedidos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 usuario_id INTEGER NOT NULL,
@@ -129,10 +122,8 @@ def inicializar_banco() -> None:
                 chave_idempotencia TEXT UNIQUE,
                 FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             )
-            """
-        )
-        conexao.execute(
-            """
+            """)
+        conexao.execute("""
             CREATE TABLE IF NOT EXISTS itens_pedido (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 pedido_id INTEGER NOT NULL,
@@ -143,16 +134,19 @@ def inicializar_banco() -> None:
                 FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
                 FOREIGN KEY (produto_id) REFERENCES produtos(id)
             )
-            """
-        )
+            """)
 
         existentes = {
             linha["descricao"]
-            for linha in conexao.execute("SELECT descricao FROM schema_migracoes").fetchall()
+            for linha in conexao.execute(
+                "SELECT descricao FROM schema_migracoes"
+            ).fetchall()
         }
         if "produtos: compatibilidade de imagens e categorias" not in existentes:
             _compatibilizar_catalogo(conexao)
-            _registrar_migracao(conexao, "produtos: compatibilidade de imagens e categorias")
+            _registrar_migracao(
+                conexao, "produtos: compatibilidade de imagens e categorias"
+            )
         if "produtos: categorias padronizadas" not in existentes:
             _padronizar_categorias(conexao)
             _registrar_migracao(conexao, "produtos: categorias padronizadas")
@@ -164,6 +158,8 @@ def inicializar_banco() -> None:
         ):
             if descricao not in existentes:
                 _registrar_migracao(conexao, descricao)
+
+        _remover_produtos_inativos_svg(conexao)
 
         if "catalogo inicial: produtos ativos sincronizados" not in existentes:
             _popular_produtos_iniciais(conexao)
@@ -225,13 +221,11 @@ def _compatibilizar_catalogo(conexao) -> None:
             """,
             (imagem, f"%{termo}%"),
         )
-    conexao.execute(
-        """
+    conexao.execute("""
         UPDATE produtos
         SET imagem = 'cesta.svg'
         WHERE imagem IS NULL OR imagem = ''
-        """
-    )
+        """)
     conexao.execute(
         "UPDATE produtos SET categoria = 'Bebidas' WHERE LOWER(categoria) = 'bebida'"
     )
@@ -240,7 +234,9 @@ def _compatibilizar_catalogo(conexao) -> None:
 def normalizar_categoria(categoria: str) -> str:
     chave = "".join(
         caractere
-        for caractere in unicodedata.normalize("NFD", str(categoria or "").strip().lower())
+        for caractere in unicodedata.normalize(
+            "NFD", str(categoria or "").strip().lower()
+        )
         if unicodedata.category(caractere) != "Mn"
     )
     categorias = {
@@ -252,7 +248,9 @@ def normalizar_categoria(categoria: str) -> str:
     try:
         return categorias[chave]
     except KeyError as exc:
-        raise ValueError("Categoria inválida. Use Hortifruti, Bebidas ou Limpeza.") from exc
+        raise ValueError(
+            "Categoria inválida. Use Hortifruti, Bebidas ou Limpeza."
+        ) from exc
 
 
 def _padronizar_categorias(conexao) -> None:
@@ -269,29 +267,192 @@ def _padronizar_categorias(conexao) -> None:
         )
 
 
+def _remover_produtos_inativos_svg(conexao) -> None:
+    referenciados = conexao.execute("""
+        SELECT p.id
+        FROM produtos p
+        WHERE p.ativo = 0
+          AND LOWER(COALESCE(p.imagem, '')) LIKE '%.svg'
+          AND EXISTS (
+              SELECT 1 FROM itens_pedido i WHERE i.produto_id = p.id
+          )
+        """).fetchall()
+    if referenciados:
+        ids = ", ".join(str(linha["id"]) for linha in referenciados)
+        raise ValueError(
+            "Não é possível excluir produtos inativos com SVG ligados a pedidos: " + ids
+        )
+    conexao.execute("""
+        DELETE FROM produtos
+        WHERE ativo = 0
+          AND LOWER(COALESCE(imagem, '')) LIKE '%.svg'
+        """)
+
+
 def _popular_produtos_iniciais(conexao) -> None:
     itens = [
-        ("Banana prata", "Hortifruti", 6.90, "kg", "Doce e madura, ideal para o dia a dia.", "banana.svg"),
-        ("Maçã gala", "Hortifruti", 9.50, "kg", "Crocante e suculenta.", "maca.svg"),
-        ("Laranja pera", "Hortifruti", 5.80, "kg", "Ótima para suco natural.", "laranja.svg"),
-        ("Tomate italiano", "Hortifruti", 8.40, "kg", "Maduro, para saladas e molhos.", "tomate.svg"),
-        ("Alface crespa", "Hortifruti", 3.50, "unidade", "Folhas frescas colhidas no dia.", "alface.svg"),
-        ("Cenoura", "Hortifruti", 4.70, "kg", "Firme e doce.", "cenoura.svg"),
-        ("Batata inglesa", "Hortifruti", 5.20, "kg", "Para cozinhar, assar ou fritar.", "batata.svg"),
-        ("Cebola", "Hortifruti", 4.90, "kg", "Base para temperos.", "cebola.svg"),
-        ("Limão tahiti", "Hortifruti", 6.10, "kg", "Ácido e aromático.", "limao.svg"),
-        ("Mamão formosa", "Hortifruti", 7.80, "kg", "Maduro, para sobremesa.", "mamao.svg"),
-        ("Água mineral 500 ml", "Bebidas", 2.50, "unidade", "Sem gás, gelada na loja.", "agua.svg"),
-        ("Suco de laranja 1 L", "Bebidas", 8.90, "L", "Néctar pronto para beber.", "suco.svg"),
-        ("Refrigerante 2 L", "Bebidas", 9.90, "L", "Sabores variados no balcão.", "refri.svg"),
-        ("Água de coco 1 L", "Bebidas", 7.50, "L", "Natural e refrescante.", "coco.svg"),
-        ("Suco de uva 1 L", "Bebidas", 12.90, "L", "Integral, sem adição de açúcar na formulação da marca.", "uva.svg"),
-        ("Detergente 500 ml", "Limpeza", 3.20, "ml", "Lava-louças neutro.", "detergente.svg"),
-        ("Água sanitária 1 L", "Limpeza", 4.80, "L", "Alvejante para uso doméstico.", "sanitaria.svg"),
-        ("Sabão em barra", "Limpeza", 2.90, "unidade", "Multiuso para roupas e louça.", "sabao.svg"),
-        ("Esponja dupla face", "Limpeza", 1.80, "unidade", "Pacote com unidade avulsa.", "esponja.svg"),
-        ("Desinfetante 2 L", "Limpeza", 8.50, "L", "Aroma suave para o chão.", "desinfetante.svg"),
+        (
+            "Banana prata",
+            "Hortifruti",
+            0.90,
+            "200g",
+            "Banana de polpa macia e sabor adocicado, ideal para consumo in natura e vitaminas.",
+            "banana-prata.JPEG",
+        ),
+        (
+            "Maçã gala",
+            "Hortifruti",
+            1.50,
+            "200g",
+            "Maçã de casca fina, polpa crocante e sabor levemente adocicado.",
+            "maça-gala.JPEG",
+        ),
+        (
+            "Laranja pera",
+            "Hortifruti",
+            0.88,
+            "200g",
+            "Laranja de sabor equilibrado e bastante suco, indicada para consumo e preparo de sucos naturais.",
+            "laranja-pera.JPEG",
+        ),
+        (
+            "Tomate italiano",
+            "Hortifruti",
+            1.85,
+            "200g",
+            "Tomate de formato alongado e polpa firme, ideal para molhos, refogados e saladas.",
+            "tomate-italiano.jpg",
+        ),
+        (
+            "Alface crespa",
+            "Hortifruti",
+            3.50,
+            "unidade",
+            "Folhas verdes e crocantes, indicada para saladas, sanduíches e acompanhamentos.",
+            "alface-crespo.JPEG",
+        ),
+        (
+            "Cenoura",
+            "Hortifruti",
+            1.30,
+            "200g",
+            "Raiz de textura firme e sabor levemente adocicado, ideal para saladas, sopas e refogados.",
+            "cenoura.JPEG",
+        ),
+        (
+            "Batata inglesa",
+            "Hortifruti",
+            1.75,
+            "200g",
+            "Batata de polpa macia após o cozimento, indicada para purês, assados, sopas e frituras.",
+            "batata-inglesa.JPEG",
+        ),
+        (
+            "Cebola",
+            "Hortifruti",
+            1.96,
+            "200g",
+            "Ingrediente versátil de sabor marcante, utilizado no preparo de temperos, molhos e refogados.",
+            "cebola.JPEG",
+        ),
+        (
+            "Limão tahiti",
+            "Hortifruti",
+            2.00,
+            "200g",
+            "Limão de sabor cítrico e suculento, ideal para sucos, temperos e bebidas.",
+            "limao-tahiti.JPEG",
+        ),
+        (
+            "Mamão formosa",
+            "Hortifruti",
+            5.60,
+            "500g",
+            "Fruta de polpa macia e sabor adocicado, ideal para consumo no café da manhã e sobremesas.",
+            "mamao-formosa.jpg",
+        ),
+        (
+            "Água mineral Indaiá 500 ml",
+            "Bebidas",
+            2.50,
+            "unidade",
+            "Água mineral natural sem gás, em embalagem prática de 500 ml para consumo diário.",
+            "agua-mineral-500ml.JPEG",
+        ),
+        (
+            "Suco de laranja Valle 1 L",
+            "Bebidas",
+            8.90,
+            "1L",
+            "Bebida à base de laranja, com sabor cítrico e refrescante, pronta para beber.",
+            "suco-de-laranja-1L.jpeg",
+        ),
+        (
+            "Refrigerante Guaraná 2 L",
+            "Bebidas",
+            9.90,
+            "2L",
+            "Refrigerante sabor guaraná, gaseificado e ideal para acompanhar refeições e lanches.",
+            "refrigerante-2L.jpg",
+        ),
+        (
+            "Água de coco Puro Coco 1 L",
+            "Bebidas",
+            7.50,
+            "1L",
+            "Bebida de água de coco, com sabor suave e refrescante, ideal para consumir gelada.",
+            "agua-de-coco-1L.JPEG",
+        ),
+        (
+            "Suco de uva Valle 1 L",
+            "Bebidas",
+            8.90,
+            "1L",
+            "Bebida de uva integral, com sabor intenso da fruta e sem adição de açúcar, conforme informações da marca.",
+            "suco-de-uva-1L.jpg",
+        ),
+        (
+            "Detergente Ype 500 ml",
+            "Limpeza",
+            3.20,
+            "500ml",
+            "Detergente líquido neutro indicado para lavar louças, removendo resíduos de gordura e alimentos.",
+            "detergente-500ml.webp",
+        ),
+        (
+            "Água sanitária Brilux 1 L",
+            "Limpeza",
+            4.80,
+            "1L",
+            "Produto à base de cloro indicado para alvejamento e higienização de superfícies, conforme as instruções do rótulo.",
+            "agua-sanitaria-1L.jpg",
+        ),
+        (
+            "Sabão em barra Bem-te-ve",
+            "Limpeza",
+            2.90,
+            "unidade",
+            "Sabão em barra indicado para a lavagem de roupas e limpeza de utensílios domésticos.",
+            "sabao-em-barra.webp",
+        ),
+        (
+            "Esponja dupla face Scotch-Brite",
+            "Limpeza",
+            1.80,
+            "unidade",
+            "Esponja com lado macio para limpeza delicada e lado abrasivo para remover sujeiras mais difíceis.",
+            "esponja-dupla-face.webp",
+        ),
+        (
+            "Desinfetante Suprema 2 L",
+            "Limpeza",
+            8.50,
+            "2L",
+            "Desinfetante líquido para limpeza de pisos e superfícies laváveis, deixando aroma agradável no ambiente.",
+            "desinfetante-2L.webp",
+        ),
     ]
+
     def chave_nome(nome: str) -> str:
         normalizado = unicodedata.normalize("NFKD", nome.strip().lower())
         return "".join(
@@ -300,41 +461,40 @@ def _popular_produtos_iniciais(conexao) -> None:
             if unicodedata.category(caractere) != "Mn"
         )
 
-    linhas = conexao.execute("SELECT id, nome FROM produtos").fetchall()
-    existentes_por_nome = {chave_nome(linha["nome"]): linha["id"] for linha in linhas}
+    aliases = {
+        chave_nome("Água mineral Indaiá 500 ml"): (chave_nome("Água mineral 500 ml"),),
+        chave_nome("Suco de laranja Valle 1 L"): (chave_nome("Suco de laranja 1 L"),),
+        chave_nome("Refrigerante Guaraná 2 L"): (
+            chave_nome("Refrigerante 2 L"),
+            chave_nome("Refrigerante"),
+        ),
+        chave_nome("Água de coco Puro Coco 1 L"): (chave_nome("Água de coco 1 L"),),
+        chave_nome("Suco de uva Valle 1 L"): (chave_nome("Suco de uva 1 L"),),
+        chave_nome("Detergente Ype 500 ml"): (chave_nome("Detergente 500 ml"),),
+        chave_nome("Água sanitária Brilux 1 L"): (chave_nome("Água sanitária 1 L"),),
+        chave_nome("Sabão em barra Bem-te-ve"): (chave_nome("Sabão em barra"),),
+        chave_nome("Esponja dupla face Scotch-Brite"): (
+            chave_nome("Esponja dupla face"),
+        ),
+        chave_nome("Desinfetante Suprema 2 L"): (chave_nome("Desinfetante 2 L"),),
+    }
+
+    linhas = conexao.execute(
+        "SELECT id, nome FROM produtos ORDER BY ativo DESC, id"
+    ).fetchall()
+    existentes_por_nome = {}
+    for linha in linhas:
+        existentes_por_nome.setdefault(chave_nome(linha["nome"]), linha["id"])
 
     for nome, categoria, preco, unidade, descricao, imagem in itens:
         chave = chave_nome(nome)
-        produto_id = None
-
-        if categoria == "Bebidas":
-            if chave.startswith("agua mineral"):
-                candidato = next(
-                    (
-                        linha
-                        for linha in linhas
-                        if chave_nome(linha["nome"]) in {"agua", "gua"}
-                        or "gua" in chave_nome(linha["nome"])
-                        or "\ufffdgua" in chave_nome(linha["nome"])
-                    ),
-                    None,
-                )
-            elif chave.startswith("refrigerante"):
-                candidato = next(
-                    (
-                        linha
-                        for linha in linhas
-                        if chave_nome(linha["nome"]) == "refrigerante"
-                    ),
-                    None,
-                )
-            else:
-                candidato = None
-            if candidato is not None:
-                produto_id = candidato["id"]
-
+        chaves_equivalentes = {chave, *aliases.get(chave, ())}
+        produto_id = existentes_por_nome.get(chave)
         if produto_id is None:
-            produto_id = existentes_por_nome.get(chave)
+            for alias in aliases.get(chave, ()):
+                produto_id = existentes_por_nome.get(alias)
+                if produto_id is not None:
+                    break
 
         if produto_id is not None:
             conexao.execute(
@@ -359,12 +519,13 @@ def _popular_produtos_iniciais(conexao) -> None:
                 (produto_id,),
             ).fetchall()
             for duplicado in duplicados:
-                if chave_nome(duplicado["nome"]) == chave:
+                if chave_nome(duplicado["nome"]) in chaves_equivalentes:
                     conexao.execute(
                         "UPDATE produtos SET ativo = 0 WHERE id = ?",
                         (duplicado["id"],),
                     )
-            existentes_por_nome[chave] = produto_id
+            for chave_equivalente in chaves_equivalentes:
+                existentes_por_nome[chave_equivalente] = produto_id
         else:
             cursor = conexao.execute(
                 """
@@ -374,7 +535,8 @@ def _popular_produtos_iniciais(conexao) -> None:
                 """,
                 (nome, categoria, preco, unidade, descricao, imagem),
             )
-            existentes_por_nome[chave] = cursor.lastrowid
+            for chave_equivalente in chaves_equivalentes:
+                existentes_por_nome[chave_equivalente] = cursor.lastrowid
 
 
 def inserir_produto(
@@ -420,7 +582,9 @@ def buscar_produto(produto_id: int) -> dict | None:
     return dict(linha)
 
 
-def buscar_produtos(nome: str | None = None, categoria: str | None = None) -> list[dict]:
+def buscar_produtos(
+    nome: str | None = None, categoria: str | None = None
+) -> list[dict]:
     """Pesquisa produtos por nome e/ou categoria. Alias pedido pelo projeto."""
     conexao = conectar()
     sql = "SELECT * FROM produtos WHERE ativo = 1"
@@ -449,7 +613,9 @@ def atualizar_produto(
 ) -> bool:
     categoria = normalizar_categoria(categoria)
     conexao = conectar()
-    atual = conexao.execute("SELECT * FROM produtos WHERE id = ?", (produto_id,)).fetchone()
+    atual = conexao.execute(
+        "SELECT * FROM produtos WHERE id = ?", (produto_id,)
+    ).fetchone()
     if atual is None:
         conexao.close()
         return False
