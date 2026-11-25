@@ -315,9 +315,7 @@ async function iniciarMeusPedidos() {
   }
 
   function mostrarMensagem(texto, tipo) {
-    mensagem.textContent = texto;
-    mensagem.className = `msg ${tipo}`;
-    mensagem.hidden = false;
+    mostrarMsg(mensagem, texto, tipo);
   }
 
   confirmarCancelamento.addEventListener("click", () => fecharModalCancelamento(true));
@@ -663,6 +661,7 @@ async function iniciarAdmin() {
       if (id) {
         await Api.put(`/produtos/${id}`, corpo);
         mostrarMsg(msg, "Produto atualizado.", "ok");
+        selecionarSecao("catalogo");
       } else {
         await Api.post("/produtos", corpo);
         mostrarMsg(msg, "Produto cadastrado.", "ok");

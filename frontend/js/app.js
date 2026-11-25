@@ -15,9 +15,16 @@ function cpfValido(cpf) {
 
 function mostrarMsg(el, texto, tipo) {
   if (!el) return;
+  clearTimeout(el._msgTimer);
   el.className = `msg ${tipo}`;
   el.textContent = texto;
   el.hidden = false;
+  if (tipo === "ok") {
+    el._msgTimer = setTimeout(() => {
+      el.hidden = true;
+      delete el._msgTimer;
+    }, 5000);
+  }
 }
 
 function headerHtml(pagina) {
