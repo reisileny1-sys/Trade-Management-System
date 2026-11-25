@@ -7,7 +7,7 @@ Estes valores ficam centralizados aqui para a retirada presencial.
 LOJA = {
     "nome": "Quitanda da Liro",
     "slogan": "Hortifrúti fresco, bebidas e limpeza para o dia a dia",
-    "endereco": "Rua do Pomar, 120 — Centro",
+    "endereco": "2° Travessa Dom Expedito Lopes, 13L - Jaboatão dos Guararapes - PE",
     "complemento": "Retirada somente no balcão da loja. Não realizamos entrega.",
     "horario": "Segunda a sábado, das 8h às 18h. Domingo fechado.",
     "prazo_retirada": (

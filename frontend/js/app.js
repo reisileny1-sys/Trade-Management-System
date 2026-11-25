@@ -28,7 +28,7 @@ function headerHtml(pagina) {
   const contaHref = user
     ? caminho("pages/perfil.html")
     : caminho("pages/login.html");
-  const contaNome = "Minha Conta";
+  const contaNome = user ? "Minha Conta" : "Fazer Login";
   const contaAcao = `<a class="btn-outline" href="${contaHref}">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 19c1.4-3 3.8-4.5 7-4.5S17.6 16 19 19"/></svg>
     <span class="rotulo">${contaNome}</span>
@@ -114,7 +114,7 @@ function headerHtml(pagina) {
 function footerHtml() {
   const loja = window.__LOJA || {
     nome: "Quitanda da Liro",
-    endereco: "Rua do Pomar, 120 — Centro",
+    endereco: "2° Travessa Dom Expedito Lopes, 13L - Jaboatão dos Guararapes - PE",
     horario: "Segunda a sábado, das 8h às 18h",
     telefone: "(00) 00000-0000",
   };
