@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Perfil · Quitanda da Liro</title>
-  <link rel="icon" type="image/png" href="../assets/images/logo-quitanda-liro-favicon.png">
+  <link rel="icon" type="image/png" href="../assets/imagens/logo-quitanda-liro-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/responsive.css">
 </head>
-<body data-root="..">
+<body data-root=".." data-page="perfil">
   <header id="site-header"></header>
   <main class="container" style="max-width:560px">
     <section class="painel formulario">
@@ -19,24 +19,60 @@
       <div id="msg-auth" hidden></div>
       <form id="form-perfil">
         <label for="nome_completo">Nome completo</label>
-        <input id="nome_completo" name="nome_completo" required>
+        <input id="nome_completo" name="nome_completo" required readonly>
         <label for="cpf">CPF</label>
         <input id="cpf" name="cpf" readonly>
         <label for="celular">Celular</label>
-        <input id="celular" name="celular" required>
+        <input id="celular" name="celular" required readonly>
         <label for="email">E-mail</label>
-        <input id="email" name="email" type="email" required>
-        <div class="acoes-form">
-          <button class="btn btn-verde" type="submit">Salvar</button>
+        <input id="email" name="email" type="email" required readonly>
+        <div class="acoes-form acoes-perfil">
+          <button class="btn btn-verde" id="btn-atualizar-conta" type="submit">Atualizar conta</button>
           <button class="btn btn-claro" id="btn-sair" type="button">Sair da conta</button>
+          <button class="btn btn-excluir" id="btn-excluir-conta" type="button">Excluir conta</button>
         </div>
       </form>
     </section>
   </main>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-confirmacao-atualizacao"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-confirmacao-atualizacao"
+    aria-describedby="texto-confirmacao-atualizacao"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-confirmacao-atualizacao">Confirmar atualização</h2>
+      <p id="texto-confirmacao-atualizacao">Tem certeza de que deseja atualizar sua conta?</p>
+      <div class="acoes-form">
+        <button class="btn btn-verde" id="confirmar-atualizacao" type="button">Sim</button>
+        <button class="btn btn-claro" id="cancelar-atualizacao" type="button">Não</button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-excluir-conta"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-excluir-conta"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-excluir-conta">Excluir conta?</h2>
+      <p>Tem certeza de que deseja excluir sua conta? Seus dados e histórico de pedidos serão apagados definitivamente.</p>
+      <div class="acoes-form">
+        <button class="btn btn-excluir" id="confirmar-excluir-conta" type="button">Sim</button>
+        <button class="btn btn-claro" id="cancelar-excluir-conta" type="button">Não</button>
+      </div>
+    </div>
+  </div>
   <footer id="site-footer"></footer>
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=2"></script>
   <script src="../js/carrinho.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/auth.js"></script>
+  <script src="../js/app.js?v=8"></script>
+  <script src="../js/auth.js?v=4"></script>
 </body>
 </html>

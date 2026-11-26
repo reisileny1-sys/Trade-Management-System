@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Finalizar · Quitanda da Liro</title>
-  <link rel="icon" type="image/png" href="../assets/images/logo-quitanda-liro-favicon.png">
+  <link rel="icon" type="image/png" href="../assets/imagens/logo-quitanda-liro-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
@@ -26,11 +26,27 @@
       <button class="btn btn-verde" id="confirmar-pedido" type="button">Confirmar pedido</button>
     </aside>
   </main>
+  <div
+    class="modal modal-confirmacao"
+    id="modal-confirmacao-pedido"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-confirmacao-pedido"
+    tabindex="-1"
+  >
+    <div class="modal-caixa">
+      <h2 id="titulo-confirmacao-pedido">Confirmar pedido?</h2>
+      <div class="acoes-form">
+        <button class="btn btn-verde" id="confirmar-pedido-final" type="button">Sim</button>
+        <button class="btn btn-claro" id="cancelar-pedido-final" type="button">Não</button>
+      </div>
+    </div>
+  </div>
   <footer id="site-footer"></footer>
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=2"></script>
   <script src="../js/carrinho.js"></script>
-  <script src="../js/app.js"></script>
+  <script src="../js/app.js?v=8"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/pedidos.js"></script>
+  <script src="../js/pedidos.js?v=4"></script>
 </body>
 </html>

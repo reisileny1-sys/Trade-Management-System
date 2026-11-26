@@ -214,7 +214,10 @@ textarea {
   align-items: center;
   gap: 22px;
 }
-.admin-tabs button {
+.admin-tabs button,
+.admin-tabs a {
+  display: inline-flex;
+  align-items: center;
   border: 2px solid transparent;
   border-radius: 999px;
   background: transparent;
@@ -226,21 +229,10 @@ textarea {
   opacity: 0.96;
 }
 .admin-tabs button:hover,
-.admin-tabs button.ativo {
-  border-color: #fff;
+.admin-tabs button.ativo,
+.admin-tabs a:hover,
+.admin-tabs a.ativo {
   opacity: 1;
-}
-.admin-exit {
-  margin-left: auto;
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: 999px;
-  color: #fff;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.admin-exit:hover {
-  background: rgba(255, 255, 255, 0.12);
 }
 .menu-cat {
   position: relative;
@@ -286,96 +278,29 @@ textarea {
 
 .hero-banner {
   margin: 22px auto 16px;
-  background:
-    radial-gradient(
-      circle at 78% 40%,
-      rgba(255, 255, 255, 0.08),
-      transparent 28%
-    ),
-    linear-gradient(
-      100deg,
-      var(--verde-hero) 0%,
-      #1a8c44 55%,
-      var(--verde-hero-2) 100%
-    );
-  color: #fff;
   border-radius: 22px;
-  min-height: 280px;
-  padding: 42px 48px;
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  align-items: center;
   position: relative;
   overflow: hidden;
   box-shadow: 0 16px 30px rgba(23, 122, 61, 0.16);
 }
-.hero-imagem {
-  position: absolute;
-  right: 18px;
-  bottom: -8px;
-  width: 46%;
-  height: 300px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  z-index: 1;
-}
-.hero-imagem img {
+.hero-banner-imagem {
+  display: block;
   width: 100%;
-  max-height: 300px;
-  object-fit: contain;
-  object-position: right bottom;
-  filter: drop-shadow(0 12px 10px rgba(0, 0, 0, 0.12));
-}
-.hero-banner > div:first-child {
-  position: relative;
-  z-index: 2;
-}
-.hero-banner::before {
-  content: "";
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  border: 18px solid rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  right: 70px;
-  top: -40px;
-}
-.selo-rosa {
-  display: inline-block;
-  background: #f4c9d8;
-  color: #b94b73;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 6px 12px;
-  margin-bottom: 14px;
-}
-.hero-banner h1 {
-  font-family: var(--display);
-  font-size: clamp(2.1rem, 4vw, 3.15rem);
-  line-height: 1.05;
-  margin: 0 0 12px;
-  font-weight: 800;
-  max-width: 12ch;
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0, 74, 35, 0.18);
-}
-.hero-banner p {
-  margin: 0 0 22px;
-  max-width: 42ch;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 1.02rem;
+  height: auto;
 }
 .btn-rosa {
+  position: absolute;
+  left: 4%;
+  bottom: 7%;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   background: #f6d5e1;
   color: #6d3148;
   border: 0;
   border-radius: 12px;
-  padding: 12px 18px;
+  padding: 9px 14px;
+  font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
 }
@@ -480,6 +405,11 @@ textarea {
   font-weight: 800;
   padding: 3px 8px;
 }
+.categoria-pill {
+  position: absolute;
+  top: 8px;
+  left: 4px;
+}
 .produto-corpo {
   width: 100%;
   display: flex;
@@ -499,6 +429,17 @@ textarea {
   font-weight: 800;
   font-size: 1.15rem;
   margin: 2px 0;
+}
+.preco-quilo {
+  width: 82%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #0aaf24;
+  color: #fff;
+  font-size: 0.76rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.2;
 }
 .cat-rosa {
   color: #e07aa0;
@@ -634,6 +575,10 @@ textarea {
   border: 1px solid var(--linha);
   background: #fff;
 }
+.formulario input[readonly] {
+  background: #f7f8f7;
+  cursor: not-allowed;
+}
 .msg {
   padding: 12px 14px;
   border-radius: 12px;
@@ -686,6 +631,9 @@ textarea {
 }
 .qtd span {
   min-width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 .linha {
@@ -711,12 +659,15 @@ textarea {
   margin: 14px 0;
 }
 .etapa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #eef1ee;
   color: #667;
   border-radius: 12px;
   padding: 10px;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 16px;
   font-weight: 800;
 }
 .etapa.concluida {
@@ -734,6 +685,28 @@ textarea {
 }
 .pedido-card {
   margin-bottom: 12px;
+}
+.pedido-miniaturas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.pedido-miniaturas img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid var(--linha);
+  border-radius: 8px;
+}
+.pedido-miniaturas-mais {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  color: var(--mudo);
+  font-weight: 800;
 }
 .confirmacao {
   text-align: center;

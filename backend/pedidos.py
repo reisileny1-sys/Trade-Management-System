@@ -174,12 +174,42 @@ def atualizar_status(pedido_id: int, novo_status: str) -> dict:
         raise ValueError("Status inválido.")
     conexao = banco.conectar()
     try:
+        conexao.execute("BEGIN IMMEDIATE")
         atual = conexao.execute("SELECT * FROM pedidos WHERE id = ?", (pedido_id,)).fetchone()
         if atual is None:
             raise ValueError("Pedido não encontrado.")
+        if atual["status"] == "cancelado":
+            raise ValueError("Pedido cancelado não pode ter o status alterado.")
         if atual["status"] == "retirado" and novo_status == "cancelado":
             raise ValueError("Pedido já retirado não pode ser cancelado.")
         conexao.execute("UPDATE pedidos SET status = ? WHERE id = ?", (novo_status, pedido_id))
+        conexao.commit()
+        return detalhar_pedido(pedido_id, conexao)
+    finally:
+        conexao.close()
+
+
+def cancelar_pedido(pedido_id: int, usuario_id: int) -> dict:
+    conexao = banco.conectar()
+    try:
+        conexao.execute("BEGIN IMMEDIATE")
+        atual = conexao.execute(
+            "SELECT usuario_id, status FROM pedidos WHERE id = ?",
+            (pedido_id,),
+        ).fetchone()
+        if atual is None:
+            raise LookupError("Pedido não encontrado.")
+        if atual["usuario_id"] != usuario_id:
+            raise PermissionError("Você só pode cancelar os seus pedidos.")
+        if atual["status"] == "cancelado":
+            raise ValueError("Este pedido já foi cancelado.")
+        if atual["status"] == "retirado":
+            raise ValueError("Pedido já retirado não pode ser cancelado.")
+
+        conexao.execute(
+            "UPDATE pedidos SET status = 'cancelado' WHERE id = ? AND usuario_id = ?",
+            (pedido_id, usuario_id),
+        )
         conexao.commit()
         return detalhar_pedido(pedido_id, conexao)
     finally:

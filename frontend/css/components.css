@@ -6,3 +6,6 @@
 .admin-secao { margin-top: 18px; }
 .admin-secao h1 { margin-top: 0; }
 .admin-secao[hidden] { display: none; }
+.modal-confirmacao h2 { margin: 0 0 12px; color: var(--verde-escuro); }
+.modal-confirmacao .acoes-form { justify-content: center; }
+.acoes-perfil #btn-excluir-conta { margin-left: auto; }

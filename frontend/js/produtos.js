@@ -30,18 +30,23 @@ function pertenceGrupo(produto, grupo) {
 
 function cardProduto(p) {
   const unidade = (p.unidade_medida || "").toLowerCase() === "unidade" ? "unidade" : p.unidade_medida;
+  const pesoGramas = { "200g": 200, "500g": 500 }[(p.unidade_medida || "").trim().toLowerCase()];
+  const precoPorQuilo = (p.categoria || "").toLowerCase().includes("horti") && pesoGramas
+    ? Number(p.preco) * 1000 / pesoGramas
+    : null;
   const imagem = p.imagem
     ? `<img src="${Api.imagem(p.imagem)}" alt="${p.nome}">`
     : emojiProduto(p.nome);
   return `
     <article class="produto-card">
       <div class="produto-foto">${imagem}
+        <span class="cat-rosa categoria-pill">${p.categoria}</span>
         <span class="unidade-pill">${unidade}</span>
       </div>
       <div class="produto-corpo">
         <h3>${p.nome}</h3>
         <div class="preco">${Api.dinheiro(p.preco)}</div>
-        <div class="cat-rosa">${p.categoria}</div>
+        ${precoPorQuilo === null ? "" : `<div class="preco-quilo">${Api.dinheiro(precoPorQuilo)}/Quilo</div>`}
         <button class="btn-add" data-add="${p.id}" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7L5 4H2"/><circle cx="9" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg>
           Adicionar
@@ -61,6 +66,46 @@ async function listarProdutos(params = {}) {
   return dados.produtos;
 }
 
+function executarAdicao(botao, produto, textoSucesso = "Adicionado") {
+  if (botao.dataset.adicionando === "1") return;
+
+  const original = botao.innerHTML;
+  const tamanho = botao.getBoundingClientRect();
+  botao.style.width = `${tamanho.width}px`;
+  botao.style.height = `${tamanho.height}px`;
+  botao.dataset.adicionando = "1";
+  botao.disabled = true;
+  botao.setAttribute("aria-busy", "true");
+  botao.innerHTML = '<span class="spinner-adicionar" aria-label="Carregando"></span>';
+  void botao.offsetWidth;
+
+  clearTimeout(botao._timerAdicao);
+  botao._timerAdicao = setTimeout(() => {
+    try {
+      Carrinho.adicionar(produto, 1);
+      botao.innerHTML = textoSucesso;
+      botao.setAttribute("aria-label", textoSucesso);
+
+      botao._timerAdicao = setTimeout(() => {
+        botao.innerHTML = original;
+        botao.removeAttribute("aria-label");
+        botao.removeAttribute("aria-busy");
+        botao.disabled = false;
+        delete botao.dataset.adicionando;
+        botao.style.width = "";
+        botao.style.height = "";
+      }, 1200);
+    } catch (_erro) {
+      botao.innerHTML = original;
+      botao.removeAttribute("aria-busy");
+      botao.disabled = false;
+      delete botao.dataset.adicionando;
+      botao.style.width = "";
+      botao.style.height = "";
+    }
+  }, 550);
+}
+
 function ligarCards(produtos, destino) {
   destino._produtos = Object.assign(destino._produtos || {}, Object.fromEntries(produtos.map((p) => [String(p.id), p])));
   if (destino.dataset.ligado === "1") return;
@@ -72,10 +117,7 @@ function ligarCards(produtos, destino) {
     if (add) {
       const p = mapa[add.dataset.add];
       if (!p) return;
-      Carrinho.adicionar(p, 1);
-      const original = add.innerHTML;
-      add.innerHTML = original.replace("Adicionar", "Adicionado");
-      setTimeout(() => { add.innerHTML = original; }, 1200);
+      executarAdicao(add, p);
     }
     if (det) abrirDetalhe(mapa[det.dataset.detalhe]);
   });
@@ -106,9 +148,8 @@ function abrirDetalhe(p) {
     </div>`;
   modal.classList.add("aberto");
   modal.querySelector("#modal-fechar").onclick = () => modal.classList.remove("aberto");
-  modal.querySelector("#modal-add").onclick = () => {
-    Carrinho.adicionar(p, 1);
-    modal.classList.remove("aberto");
+  modal.querySelector("#modal-add").onclick = (evento) => {
+    executarAdicao(evento.currentTarget, p);
   };
   modal.onclick = (e) => { if (e.target === modal) modal.classList.remove("aberto"); };
 }

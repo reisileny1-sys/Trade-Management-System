@@ -125,7 +125,7 @@ def _salvar_imagem(corpo: dict, obrigatoria: bool = False) -> str | None:
             "image/gif": "gif",
         }[mime]
         nome = f"produto-{secrets.token_hex(8)}.{extensao}"
-        pasta = FRONTEND / "assets" / "images"
+        pasta = FRONTEND / "assets" / "imagens"
         pasta.mkdir(parents=True, exist_ok=True)
         (pasta / nome).write_bytes(bruto)
         return nome
@@ -312,6 +312,19 @@ async def atualizar_perfil(
     return {"usuario": atualizado}
 
 
+@app.delete("/api/me")
+def excluir_perfil(
+    authorization: str | None = Header(default=None),
+    cookie: str | None = Header(default=None),
+) -> dict:
+    usuario = _exigir_usuario(authorization, cookie)
+    try:
+        auth.excluir_conta(usuario["id"])
+    except ValueError as exc:
+        raise ErroApi(404, str(exc)) from exc
+    return {"ok": True}
+
+
 @app.post("/api/pedidos", status_code=201)
 async def criar_pedido(
     request: Request,
@@ -357,6 +370,24 @@ def detalhar_pedido(
     if pedido_detalhado["usuario_id"] != usuario["id"] and usuario.get("perfil") != "admin":
         raise ErroApi(403, "Você só pode consultar os seus pedidos.")
     return {"pedido": pedido_detalhado}
+
+
+@app.post("/api/pedidos/{pedido_id}/cancelar")
+def cancelar_pedido(
+    pedido_id: int,
+    authorization: str | None = Header(default=None),
+    cookie: str | None = Header(default=None),
+) -> dict:
+    usuario = _exigir_usuario(authorization, cookie)
+    try:
+        pedido_cancelado = pedidos.cancelar_pedido(pedido_id, usuario["id"])
+    except LookupError as exc:
+        raise ErroApi(404, str(exc)) from exc
+    except PermissionError as exc:
+        raise ErroApi(403, str(exc)) from exc
+    except ValueError as exc:
+        raise ErroApi(400, str(exc)) from exc
+    return {"pedido": pedido_cancelado}
 
 
 @app.patch("/api/pedidos/{pedido_id}/status")
@@ -420,7 +451,7 @@ def servir_frontend(caminho: str) -> FileResponse:
         alvo = alvo / "index.html"
     if not alvo.is_file():
         raise ErroApi(404, "Arquivo não encontrado.")
-    return FileResponse(alvo)
+    return FileResponse(alvo, headers={"Cache-Control": "no-cache"})
 
 
 def main() -> None:
